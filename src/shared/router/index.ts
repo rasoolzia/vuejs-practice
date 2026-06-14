@@ -16,7 +16,7 @@ const router = createRouter({
     ...dashboardRoutes,
     ...playgroundRoute,
   ],
-  history: createWebHistory(),
+  history: createWebHistory('/vuejs-practice'),
 });
 
 router.beforeEach((to, _from, next) => {

@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.3.0.beta.1",
   "type": "module",
+  "homepage": "/vuejs-practice",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
