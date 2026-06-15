@@ -1,6 +1,6 @@
 <template>
   <div class="signup">
-    <form class="signup__form" @submit.prevent="handleSignup">
+    <form class="signup__form" @submit.prevent="handleSignUp">
       <CustomInput
         label="Username"
         name="username"
@@ -53,7 +53,7 @@ const data = reactive({
   confirmPassword: '',
   terms: false,
 });
-const handleSignup = () => authBridge.register(data);
+const handleSignUp = () => authBridge.register(data);
 </script>
 
 <style lang="scss" scoped>

@@ -1,6 +1,6 @@
 <template>
   <div class="signin">
-    <form class="signin__form" @submit.prevent="handleSignin">
+    <form class="signin__form" @submit.prevent="handleSignIn">
       <CustomInput
         label="Username or Email"
         name="identifier"
@@ -18,11 +18,11 @@
         <input type="checkbox" v-model="data.remember" id="remember" />
         <label for="remember">remember me</label>
       </div>
-      <CustomButton type="submit">ورود</CustomButton>
+      <CustomButton type="submit">Sign In</CustomButton>
     </form>
     <div>
-      don't have account?
-      <RouterLink :to="{ name: 'signup' }">SignUp</RouterLink>
+      Don't have an account?
+      <RouterLink :to="{ name: 'signup' }">Sign Up</RouterLink>
     </div>
   </div>
 </template>
@@ -49,7 +49,7 @@ const data = reactive({
   password: '',
   remember: false,
 });
-const handleSignin = () => authBridge.login(data);
+const handleSignIn = () => authBridge.login(data);
 </script>
 
 <style lang="scss" scoped>
