@@ -35,18 +35,15 @@
         :errorText="fieldErrors.confirmPassword"
         @input="validateField('confirmPassword')"
       />
-      <div class="flex gap-2">
-        <input
-          type="checkbox"
-          v-model="data.terms"
-          id="terms"
-          @change="validateField('terms')"
-        />
-        <label for="terms">I accept the terms and conditions</label>
-      </div>
-      <p v-if="fieldErrors.terms" class="mt-1 text-sm text-red-500">
-        {{ fieldErrors.terms }}
-      </p>
+      <CustomCheckbox
+        id="terms"
+        name="terms"
+        label="I accept the terms and conditions"
+        v-model="data.terms"
+        :hasError="!!fieldErrors.terms"
+        :errorText="fieldErrors.terms"
+        @change="validateField('terms')"
+      />
       <CustomButton type="submit" :disabled="authBridge.isAuthInUse.value">
         {{ authBridge.isAuthInUse.value ? 'Signing up…' : 'Sign Up' }}
       </CustomButton>
@@ -102,7 +99,7 @@ const handleSignUp = async () => {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
   }
 }
 </style>

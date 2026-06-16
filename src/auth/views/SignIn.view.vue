@@ -18,10 +18,12 @@
         :errorText="fieldErrors.password"
         @input="validateField('password')"
       />
-      <div class="flex gap-2">
-        <input type="checkbox" v-model="data.remember" id="remember" />
-        <label for="remember">Remember me</label>
-      </div>
+      <CustomCheckbox
+        id="remember"
+        name="remember"
+        label="Remember me"
+        v-model="data.remember"
+      />
       <CustomButton type="submit" :disabled="authBridge.isAuthInUse.value">
         {{ authBridge.isAuthInUse.value ? 'Signing in…' : 'Sign In' }}
       </CustomButton>
@@ -75,7 +77,7 @@ const handleSignIn = async () => {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
   }
 }
 </style>
