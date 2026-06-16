@@ -10,8 +10,8 @@ export function useAuthBridge() {
   const router = useRouter();
 
   return {
-    isAuthInUse: authStore.loading,
-    username: authStore.user?.username,
+    isAuthInUse: computed(() => authStore.loading),
+    username: computed(() => authStore.user?.username),
 
     async login(data: LoginFormData) {
       const res: LoginResponse | string = await authStore.login(data);

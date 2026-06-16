@@ -8,17 +8,21 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 /**
  * Lightweight form helper for Zod + Vue.
  *
- * - `validate()` validates all fields (on submit)
- * - `validateField('name')` validates a single field (on blur)
- * - `clearFieldError('name')` clears error as user types
+ * Validation lifecycle:
+ * - Before first submit: errors are hidden (isDirty = false)
+ * - On submit: full validation runs, isDirty = true
+ * - After first submit: every @input triggers validateField so errors
+ *   update live (e.g. "Required" → "Invalid email") instead of disappearing
+ * - clearFieldError is only meant for special cases (e.g. checkbox toggles)
  */
 export function useZodForm<T extends Record<string, unknown>>(
   schema: z.ZodType<T>,
   data: T,
 ) {
-  // Note: use a plain string-keyed record to avoid Vue's generic reactive index typing issues.
   const fieldErrors = reactive<Record<string, string>>({});
   const formError = ref('');
+  // Once the user submits once, we validate on every keystroke
+  const isDirty = ref(false);
 
   const setErrorsFromZod = (error: z.ZodError<T>) => {
     const next: Record<string, string> = {};
@@ -28,13 +32,17 @@ export function useZodForm<T extends Record<string, unknown>>(
         next[key] = issue.message;
       }
     }
+    // Clear keys that are now valid, set keys that have errors
+    for (const key of Object.keys(fieldErrors)) {
+      if (!(key in next)) delete fieldErrors[key];
+    }
     Object.assign(fieldErrors, next);
   };
 
   const clearErrors = () => {
     formError.value = '';
     for (const key of Object.keys(fieldErrors)) {
-      delete (fieldErrors as Record<string, string>)[key];
+      delete fieldErrors[key];
     }
   };
 
@@ -43,7 +51,12 @@ export function useZodForm<T extends Record<string, unknown>>(
     delete fieldErrors[String(key)];
   };
 
+  /**
+   * Full validation — call on submit.
+   * Sets isDirty so subsequent @input events validate live.
+   */
   const validate = () => {
+    isDirty.value = true;
     clearErrors();
     const result = schema.safeParse(data);
     if (result.success) return { ok: true as const, data: result.data };
@@ -51,19 +64,29 @@ export function useZodForm<T extends Record<string, unknown>>(
     return { ok: false as const };
   };
 
+  /**
+   * Single-field validation — call on @input and @blur.
+   * Before the first submit (isDirty = false) this is a no-op so we don't
+   * show errors while the user is still filling the form for the first time.
+   */
   const validateField = <K extends keyof T>(key: K) => {
-    clearFieldError(key);
+    if (!isDirty.value) return true;
 
-    // Validate whole form and keep only this field's error.
-    // (Zod doesn't support "validate a single field" reliably with refinements.)
     const result = schema.safeParse(data);
-    if (result.success) return true;
+    if (result.success) {
+      // Field is now valid — clear its error if there was one
+      delete fieldErrors[String(key)];
+      return true;
+    }
 
     const issueForField = result.error.issues.find((i) => i.path?.[0] === key);
     if (issueForField) {
       fieldErrors[String(key)] = issueForField.message;
       return false;
     }
+
+    // No issue for this field specifically — it's valid now
+    delete fieldErrors[String(key)];
     return true;
   };
 
@@ -73,11 +96,11 @@ export function useZodForm<T extends Record<string, unknown>>(
   return {
     fieldErrors: fieldErrors as FieldErrors<T>,
     formError,
+    isDirty,
     validate,
     validateField,
     clearFieldError,
     clearErrors,
-    // tiny helper for unknown errors -> string
     normalizeError: (value: unknown, fallback: string) =>
       isValidationError(value) ? (value as Error).message : fallback,
   };

@@ -4,67 +4,59 @@
       <CustomInput
         label="Username"
         name="username"
-        rules="required"
         v-model="data.username"
         :hasError="!!fieldErrors.username"
         :errorText="fieldErrors.username"
-        @input="clearFieldError('username')"
-        @blur="validateField('username')"
+        @input="validateField('username')"
       />
       <CustomInput
         label="Email"
         name="email"
-        rules="required"
         v-model="data.email"
         :hasError="!!fieldErrors.email"
         :errorText="fieldErrors.email"
-        @input="clearFieldError('email')"
-        @blur="validateField('email')"
+        @input="validateField('email')"
       />
       <CustomInput
         label="Password"
         name="password"
-        rules="required|min:5"
         type="password"
         v-model="data.password"
         :hasError="!!fieldErrors.password"
         :errorText="fieldErrors.password"
-        @input="clearFieldError('password')"
-        @blur="validateField('password')"
+        @input="validateField('password')"
       />
       <CustomInput
-        label="Password Confirmation"
+        label="Confirm Password"
         name="confirmPassword"
-        rules="required|min:5"
         type="password"
         v-model="data.confirmPassword"
         :hasError="!!fieldErrors.confirmPassword"
         :errorText="fieldErrors.confirmPassword"
-        @input="clearFieldError('confirmPassword')"
-        @blur="validateField('confirmPassword')"
+        @input="validateField('confirmPassword')"
       />
       <div class="flex gap-2">
         <input
           type="checkbox"
           v-model="data.terms"
           id="terms"
-          @change="
-            data.terms ? clearFieldError('terms') : validateField('terms')
-          "
+          @change="validateField('terms')"
         />
-        <label for="terms">accept the terms</label>
+        <label for="terms">I accept the terms and conditions</label>
       </div>
       <p v-if="fieldErrors.terms" class="mt-1 text-sm text-red-500">
         {{ fieldErrors.terms }}
       </p>
-      <CustomButton type="submit">register</CustomButton>
+      <CustomButton type="submit" :disabled="authBridge.isAuthInUse.value">
+        {{ authBridge.isAuthInUse.value ? 'Signing up…' : 'Sign Up' }}
+      </CustomButton>
     </form>
     <p v-if="formError" class="mt-2 text-sm text-red-500">
       {{ formError }}
     </p>
     <div>
-      already have account?
-      <RouterLink :to="{ name: 'signin' }">SignIn</RouterLink>
+      Already have an account?
+      <RouterLink :to="{ name: 'signin' }">Sign In</RouterLink>
     </div>
   </div>
 </template>
@@ -73,9 +65,8 @@
 import { authSchema } from '@/auth/schemas';
 import { useZodForm } from '@/shared/composables/useZodForm.composable';
 import { useAuthBridge } from '@shared/bridges';
-const authBridge = useAuthBridge();
 
-//TODO use vee-validate, vue-query, error handling and fixing ui when I have time :)
+const authBridge = useAuthBridge();
 
 const data = reactive({
   username: '',
@@ -85,15 +76,16 @@ const data = reactive({
   terms: false,
 });
 
-const { fieldErrors, formError, validate, validateField, clearFieldError } =
-  useZodForm(authSchema.registerSchema, data);
+const { fieldErrors, formError, validate, validateField } = useZodForm(
+  authSchema.registerSchema,
+  data,
+);
 
 const handleSignUp = async () => {
   const result = validate();
   if (!result.ok) return;
 
   const res = await authBridge.register(data);
-
   if (typeof res === 'string') {
     formError.value = res;
   }

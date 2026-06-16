@@ -1,4 +1,3 @@
-import * as loginSchema from './login.schema';
-import * as registerSchema from './register.schema';
+import * as authSchema from './auth.schema';
 
-export const authSchema = { ...loginSchema, ...registerSchema };
+export { authSchema };
