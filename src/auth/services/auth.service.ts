@@ -21,8 +21,7 @@ const storeAuthData = (result: LoginResponse): void => {
 
 export const authService = {
   login: async (data: LoginFormData) => {
-    const credentials = authSchema.loginSchema.parse(data);
-    const payload = authMappers.toLoginPayload(credentials);
+    const payload = authMappers.toLoginPayload(data);
     const response = await authRepository.login(payload);
     const result = authSchema.responseSchema.parse(response) as LoginResponse;
     storeAuthData(result);
@@ -30,8 +29,7 @@ export const authService = {
   },
 
   register: async (data: RegisterFormData) => {
-    const credentials = authSchema.registerSchema.parse(data);
-    const payload = authMappers.toRegisterPayload(credentials);
+    const payload = authMappers.toRegisterPayload(data);
     const response = await authRepository.register(payload);
     const result = authSchema.responseSchema.parse(response) as LoginResponse;
     return result;

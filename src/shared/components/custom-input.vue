@@ -26,6 +26,12 @@ const props = withDefaults(defineProps<Props>(), {
   hasError: false,
 });
 
+const emit = defineEmits<{
+  (e: 'input', value: string): void;
+  (e: 'blur', event: FocusEvent): void;
+  (e: 'focus', event: FocusEvent): void;
+}>();
+
 const modelValue = defineModel({
   default: '',
 });
@@ -47,6 +53,7 @@ const errorId = `${inputId}-error`;
 const handleInput = (e: Event) => {
   const target = e.target as HTMLInputElement;
   modelValue.value = target.value;
+  emit('input', target.value);
 };
 
 const handleFocus = (e: FocusEvent) => {
@@ -56,6 +63,7 @@ const handleFocus = (e: FocusEvent) => {
   ) {
     isFocused.value = true;
   }
+  emit('focus', e);
 };
 
 const handleBlur = (e: FocusEvent) => {
@@ -65,6 +73,7 @@ const handleBlur = (e: FocusEvent) => {
   ) {
     isFocused.value = false;
   }
+  emit('blur', e);
 };
 </script>
 

@@ -8,18 +8,23 @@ import type {
 export function useAuthBridge() {
   const authStore = useAuthStore();
   const router = useRouter();
+
   return {
     isAuthInUse: authStore.loading,
     username: authStore.user?.username,
 
     async login(data: LoginFormData) {
-      const res = (await authStore.login(data)) as LoginResponse;
+      const res: LoginResponse | string = await authStore.login(data);
+      if (typeof res === 'string') return res;
       if (res?.accessToken) router.replace({ name: 'dashboard' });
+      return res;
     },
 
     async register(data: RegisterFormData) {
-      const res = (await authStore.register(data)) as LoginResponse;
+      const res: LoginResponse | string = await authStore.register(data);
+      if (typeof res === 'string') return res;
       if (res?.accessToken) router.replace({ name: 'dashboard' });
+      return res;
     },
 
     async logout() {

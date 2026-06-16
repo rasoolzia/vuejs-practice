@@ -30,7 +30,6 @@ export const useAuthStore = defineStore(
         user.value = data.user;
         return data;
       } catch (error: unknown) {
-        //TODO remove try/catch after adding vue-query
         console.error('Login error:', error);
         const errorMessage =
           error instanceof Error ? error.message : 'Login failed';
@@ -49,7 +48,6 @@ export const useAuthStore = defineStore(
         user.value = data.user;
         return data;
       } catch (error: unknown) {
-        //TODO remove try/catch after adding vue-query
         console.error('Registration error:', error);
         const errorMessage =
           error instanceof Error ? error.message : 'Registration failed';
