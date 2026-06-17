@@ -3,8 +3,8 @@ defineOptions({
   name: 'ProfileWidget',
 });
 defineProps({
-  name: { type: String, required: true },
+  name: { type: String },
 });
 </script>
 
-<template>{{ name }}</template>
+<template>{{ name ?? '' }}</template>

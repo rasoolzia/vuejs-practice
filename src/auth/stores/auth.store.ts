@@ -75,7 +75,8 @@ export const useAuthStore = defineStore(
     const logout = async (): Promise<{ status: string; message: string }> => {
       loading.value = true;
       try {
-        // const response = await authService.logout();
+        const response = await authService.logout();
+        console.log('response :', response);
         user.value = null;
         return { status: 'true', message: 'you logged in successfully' };
       } finally {

@@ -24,4 +24,5 @@ watchEffect(() => {
       <slot />
     </component>
   </Transition>
+  <ConfirmDialog />
 </template>

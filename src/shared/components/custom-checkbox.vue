@@ -48,7 +48,7 @@ const handleBlur = (e: FocusEvent) => {
 
 <template>
   <div class="flex flex-col gap-1 select-none">
-    <label :for="inputId" class="flex items-start gap-2 cursor-pointer">
+    <label :for="inputId" class="flex items-center gap-2 cursor-pointer">
       <input
         :id="inputId"
         :name="props.name"
@@ -58,7 +58,7 @@ const handleBlur = (e: FocusEvent) => {
         :aria-invalid="props.hasError"
         :aria-describedby="props.hasError ? errorId : undefined"
         :class="[
-          'mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50',
+          'h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50',
           inputClass,
         ]"
         @change="handleChange"
