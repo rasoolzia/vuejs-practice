@@ -8,14 +8,19 @@ import type {
   User,
 } from '@/auth/types';
 import { StorageFactory } from '@/shared/libs';
+import { tokenNames } from '../constants';
 
 const cookieStorage = StorageFactory.createStrategy('cookieStorage');
 const storeAuthData = (result: LoginResponse): void => {
   if (result.accessToken) {
-    cookieStorage.set('token', result.accessToken, { expires: 1 });
+    cookieStorage.set(tokenNames.accessToken, result.accessToken, {
+      expires: 1,
+    });
   }
   if (result.refreshToken) {
-    cookieStorage.set('refreshToken', result.refreshToken, { expires: 7 });
+    cookieStorage.set(tokenNames.refreshToken, result.refreshToken, {
+      expires: 7,
+    });
   }
 };
 
