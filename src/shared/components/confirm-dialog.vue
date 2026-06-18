@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useConfirmDialogState } from '@shared/composables/useConfirm';
+import CustomButton from './custom-button.vue';
 
 const { state, handleConfirm, handleCancel } = useConfirmDialogState();
 
@@ -7,10 +8,15 @@ watchEffect(() => {
   document.body.style.overflow = state.isOpen ? 'hidden' : '';
 });
 
+function onBackdropClick(): void {
+  if (state.isLoading || !state.closeOnClickOutside) return;
+  handleCancel();
+}
+
 function onKeydown(e: KeyboardEvent): void {
-  if (!state.isOpen) return;
-  if (e.key === 'Escape') handleCancel();
-  if (e.key === 'Enter') handleConfirm();
+  if (!state.isOpen || state.isLoading) return;
+  if (e.key === 'Escape' && state.cancelByEscape) handleCancel();
+  if (e.key === 'Enter' && state.confirmOnEnter) handleConfirm();
 }
 
 onMounted(() => document.addEventListener('keydown', onKeydown));
@@ -32,41 +38,43 @@ onUnmounted(() => {
     >
       <div
         v-if="state.isOpen"
-        class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50"
-        @click.self="handleCancel"
+        class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+        @click.self="onBackdropClick"
       >
         <div
-          class="w-[min(400px,90vw)] rounded-lg bg-white p-6"
+          class="w-[min(400px,90vw)] rounded-lg bg-white p-6 shadow-2xl"
           role="alertdialog"
           aria-modal="true"
           :aria-label="state.title"
         >
-          <h2 class="mb-2 text-lg font-semibold text-gray-900">
+          <h2
+            class="mb-2 text-lg font-semibold"
+            :class="
+              state.variant === 'danger'
+                ? 'text-red-600 dark:text-red-500'
+                : 'text-gray-900 dark:text-white'
+            "
+          >
             {{ state.title }}
           </h2>
-          <p class="text-gray-600">
+          <p class="text-gray-600 dark:text-gray-300">
             {{ state.message }}
           </p>
           <div class="mt-5 flex justify-end gap-2">
-            <button
-              type="button"
-              class="rounded-md border border-gray-300 px-4 py-2 font-medium hover:bg-gray-50"
+            <CustomButton
+              variant="secondary"
+              :disabled="state.isLoading"
               @click="handleCancel"
             >
               {{ state.cancelText }}
-            </button>
-            <button
-              type="button"
-              :class="[
-                'rounded-md px-4 py-2 font-medium text-white',
-                state.variant === 'danger'
-                  ? 'bg-red-500 hover:bg-red-600'
-                  : 'bg-blue-500 hover:bg-blue-600',
-              ]"
+            </CustomButton>
+            <CustomButton
+              :variant="state.variant"
+              :loading="state.isLoading"
               @click="handleConfirm"
             >
               {{ state.confirmText }}
-            </button>
+            </CustomButton>
           </div>
         </div>
       </div>

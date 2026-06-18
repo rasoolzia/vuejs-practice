@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface Props {
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   prependIcon?: string;
   appendIcon?: string;
@@ -27,6 +27,8 @@ const variantsMap = {
     'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500 disabled:bg-gray-400',
   outline:
     'border border-indigo-600 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-neutral-800 focus:ring-indigo-500 disabled:border-indigo-300 disabled:text-indigo-300',
+  danger:
+    'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-red-400',
 };
 const sizesMap = {
   sm: 'px-3 py-1 text-sm',

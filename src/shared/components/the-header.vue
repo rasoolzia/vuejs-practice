@@ -9,13 +9,15 @@ const { username, logout } = useAuthBridge();
 const { confirm } = useConfirm();
 
 async function handleLogout() {
-  const ok = await confirm({
+  await confirm({
     title: 'Log out?',
     message: "You'll need to sign in again to access your account.",
     confirmText: 'Log out',
     variant: 'danger',
+    onConfirm: async () => {
+      await logout();
+    },
   });
-  if (ok) logout();
 }
 </script>
 
