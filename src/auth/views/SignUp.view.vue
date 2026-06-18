@@ -44,7 +44,7 @@
         :errorText="fieldErrors.terms"
         @change="validateField('terms')"
       />
-      <CustomButton type="submit" :disabled="authBridge.isAuthInUse.value">
+      <CustomButton type="submit" :loading="authBridge.isAuthInUse.value">
         {{ authBridge.isAuthInUse.value ? 'Signing up…' : 'Sign Up' }}
       </CustomButton>
     </form>

@@ -40,16 +40,15 @@ export const preloadSvg = async (name: string, subDomain = 'shared') => {
 
 export default {
   name: 'SvgLoader',
+  inheritAttrs: false,
   props: {
     name: { type: String, required: true },
     subDomain: { type: String, default: 'shared' },
     path: { type: String, default: '' },
-    width: { type: String, default: undefined },
-    height: { type: String, default: undefined },
+    width: { type: String, default: '24px' },
+    height: { type: String, default: '24px' },
     color: { type: String, default: undefined },
     backgroundColor: { type: String, default: undefined },
-    preserveAspectRatio: { type: String, default: undefined },
-    viewBox: { type: String, default: undefined },
   },
   setup(props: SvgLoaderProps) {
     const svgContent = ref<string | null>(null);
@@ -76,37 +75,23 @@ export default {
 
     watchEffect(loadSvg);
 
-    const attributes = {
-      ...(props.width && { width: props.width }),
-      ...(props.height && { height: props.height }),
-      ...(props.height && props.width && { preserveAspectRatio: 'none' }),
-      ...(props.viewBox && { viewBox: props.viewBox }),
+    return {
+      svgContent,
+      currentColor,
     };
-
-    return { svgContent, currentColor, attributes };
   },
 };
 </script>
 
 <template>
   <span
+    class="inline-flex"
     v-html="svgContent"
-    v-bind="attributes"
-    class="svg"
     :style="{
-      '--current-color': color || currentColor,
-      '--current-background-color': backgroundColor,
+      width,
+      height,
+      color: color || currentColor,
+      backgroundColor,
     }"
   />
 </template>
-
-<style lang="scss" scoped>
-.svg {
-  color: var(--current-color);
-  background-color: var(--current-background-color);
-  max-width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-</style>

@@ -24,7 +24,7 @@
         label="Remember me"
         v-model="data.remember"
       />
-      <CustomButton type="submit" :disabled="authBridge.isAuthInUse.value">
+      <CustomButton type="submit" :loading="authBridge.isAuthInUse.value">
         {{ authBridge.isAuthInUse.value ? 'Signing in…' : 'Sign In' }}
       </CustomButton>
     </form>
