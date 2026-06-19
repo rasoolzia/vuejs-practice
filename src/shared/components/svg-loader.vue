@@ -50,7 +50,7 @@ export default {
     color: { type: String, default: undefined },
     backgroundColor: { type: String, default: undefined },
   },
-  setup(props: SvgLoaderProps) {
+  setup(props: SvgLoaderProps, { attrs }) {
     const svgContent = ref<string | null>(null);
     const currentColor = ref<string>('');
 
@@ -78,6 +78,7 @@ export default {
     return {
       svgContent,
       currentColor,
+      attrs,
     };
   },
 };
@@ -85,6 +86,7 @@ export default {
 
 <template>
   <span
+    v-bind="attrs"
     class="inline-flex"
     v-html="svgContent"
     :style="{
