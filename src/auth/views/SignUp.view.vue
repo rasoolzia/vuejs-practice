@@ -82,9 +82,11 @@ const handleSignUp = async () => {
   const result = validate();
   if (!result.ok) return;
 
-  const res = await authBridge.register(data);
-  if (typeof res === 'string') {
-    formError.value = res;
+  try {
+    await authBridge.register(data);
+  } catch (error) {
+    // toast.error(error instanceof Error ? error.message : 'Login failed');
+    console.error(error instanceof Error ? error.message : 'Login failed');
   }
 };
 </script>

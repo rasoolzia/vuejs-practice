@@ -1,4 +1,4 @@
-import { authService } from '@/auth/services';
+import { authService, tokenService } from '@/auth/services';
 import type {
   LoginFormData,
   LoginResponse,
@@ -38,7 +38,7 @@ export const useAuthStore = defineStore(
 
     const register = async (
       credentials: RegisterFormData,
-    ): Promise<LoginResponse | string> => {
+    ): Promise<LoginResponse> => {
       loading.value = true;
 
       try {
@@ -87,31 +87,18 @@ export const useAuthStore = defineStore(
       user.value = data.user;
       isAuthenticated.value = true;
 
-      if (data.accessToken) {
-        cookieStorage.set(tokenNames.accessToken, data.accessToken, {
-          expires: 1,
-        });
-      }
-
-      if (data.refreshToken) {
-        cookieStorage.set(tokenNames.refreshToken, data.refreshToken, {
-          expires: 7,
-        });
-      }
+      tokenService.setTokens(data.accessToken, data.refreshToken);
     };
 
-    const clearAuth = (): void => {
-      cookieStorage.remove(tokenNames.accessToken);
-      cookieStorage.remove(tokenNames.refreshToken);
+    const clearAuth = () => {
+      tokenService.clearTokens();
 
       user.value = null;
       isAuthenticated.value = false;
     };
 
-    const checkIsAuthenticated = (): boolean => {
-      const token = cookieStorage.get(tokenNames.accessToken);
-
-      return !!token && token.split('.').length === 3;
+    const checkIsAuthenticated = () => {
+      return tokenService.hasValidAccessToken();
     };
 
     const restoreAuth = (): void => {
@@ -132,10 +119,11 @@ export const useAuthStore = defineStore(
       // Actions
       login,
       register,
-      updateUser,
-      getCurrentUser,
       logout,
+      getCurrentUser,
+      updateUser,
       restoreAuth,
+      clearAuth,
     };
   },
   {
