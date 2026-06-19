@@ -7,44 +7,41 @@ import type {
   RegisterFormData,
   User,
 } from '@/auth/types';
-import { StorageFactory } from '@/shared/libs';
-import { tokenNames } from '../constants';
-
-const cookieStorage = StorageFactory.createStrategy('cookieStorage');
-const storeAuthData = (result: LoginResponse): void => {
-  if (result.accessToken) {
-    cookieStorage.set(tokenNames.accessToken, result.accessToken, {
-      expires: 1,
-    });
-  }
-  if (result.refreshToken) {
-    cookieStorage.set(tokenNames.refreshToken, result.refreshToken, {
-      expires: 7,
-    });
-  }
-};
 
 export const authService = {
   login: async (data: LoginFormData) => {
     const payload = authMappers.toLoginPayload(data);
     const response = await authRepository.login(payload);
-    const result = authSchema.responseSchema.parse(response) as LoginResponse;
-    storeAuthData(result);
-    return result;
+    return authSchema.responseSchema.parse(response) as LoginResponse;
   },
 
   register: async (data: RegisterFormData) => {
     const payload = authMappers.toRegisterPayload(data);
     const response = await authRepository.register(payload);
-    const result = authSchema.responseSchema.parse(response) as LoginResponse;
-    return result;
+    return authSchema.responseSchema.parse(response) as LoginResponse;
   },
 
   getCurrentUser: async (): Promise<User> => {
     return await authRepository.getCurrentUser();
   },
 
-  logout: async () => {
-    return await authRepository.logout();
+  logout: async (refreshToken?: string) => {
+    try {
+      if (refreshToken) {
+        return await authRepository.logout(refreshToken);
+      }
+
+      return {
+        message: 'Logged out successfully',
+      };
+    } catch (error) {
+      return {
+        message: error instanceof Error ? error.message : 'Logout failed',
+      };
+    }
+  },
+
+  refreshToken: async (refreshToken: string) => {
+    return authRepository.refreshToken(refreshToken);
   },
 };

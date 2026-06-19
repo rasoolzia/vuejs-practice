@@ -5,10 +5,13 @@ import type {
   RegisterFormData,
   User,
 } from '@/auth/types';
-import { cryptoSerializer } from '@/shared/libs';
+import { cryptoSerializer, StorageFactory } from '@/shared/libs';
 import { defineStore } from 'pinia';
+import { tokenNames } from '../constants';
 
 const storageSecretKey = import.meta.env.VITE_ENCRYPT_KEY;
+
+const cookieStorage = StorageFactory.createStrategy('cookieStorage');
 
 export const useAuthStore = defineStore(
   'auth',
@@ -16,24 +19,18 @@ export const useAuthStore = defineStore(
     // State
     const user = ref<User | null>(null);
     const loading = ref(false);
-
-    // Getters
-    const isAuthenticated = computed(() => !!user.value);
+    const isAuthenticated = ref(false);
 
     // Actions
     const login = async (
       credentials: LoginFormData,
-    ): Promise<LoginResponse | string> => {
+    ): Promise<LoginResponse> => {
       loading.value = true;
+
       try {
-        const data: LoginResponse = await authService.login(credentials);
-        user.value = data.user;
+        const data = await authService.login(credentials);
+        setLoginData(data);
         return data;
-      } catch (error: unknown) {
-        console.error('Login error:', error);
-        const errorMessage =
-          error instanceof Error ? error.message : 'Login failed';
-        return errorMessage;
       } finally {
         loading.value = false;
       }
@@ -43,15 +40,11 @@ export const useAuthStore = defineStore(
       credentials: RegisterFormData,
     ): Promise<LoginResponse | string> => {
       loading.value = true;
+
       try {
-        const data: LoginResponse = await authService.register(credentials);
-        user.value = data.user;
+        const data = await authService.register(credentials);
+        setLoginData(data);
         return data;
-      } catch (error: unknown) {
-        console.error('Registration error:', error);
-        const errorMessage =
-          error instanceof Error ? error.message : 'Registration failed';
-        return errorMessage;
       } finally {
         loading.value = false;
       }
@@ -64,26 +57,72 @@ export const useAuthStore = defineStore(
     const getCurrentUser = async (): Promise<User | undefined> => {
       try {
         const userData = await authService.getCurrentUser();
+
         user.value = userData;
+        isAuthenticated.value = true;
+
         return userData;
-      } catch (error: unknown) {
-        console.error('Get current user error:', error);
+      } catch (error) {
+        console.error(error);
+
         return undefined;
       }
     };
 
-    const logout = async (): Promise<{ status: string; message: string }> => {
+    const logout = async () => {
       loading.value = true;
+
       try {
-        const response = await authService.logout();
-        console.log('response :', response);
-        user.value = null;
-        return { status: 'true', message: 'you logged in successfully' };
+        const response = await authService.logout(
+          cookieStorage.get(tokenNames.refreshToken) || undefined,
+        );
+        clearAuth();
+        return response;
       } finally {
         loading.value = false;
       }
     };
 
+    const setLoginData = (data: LoginResponse): void => {
+      user.value = data.user;
+      isAuthenticated.value = true;
+
+      if (data.accessToken) {
+        cookieStorage.set(tokenNames.accessToken, data.accessToken, {
+          expires: 1,
+        });
+      }
+
+      if (data.refreshToken) {
+        cookieStorage.set(tokenNames.refreshToken, data.refreshToken, {
+          expires: 7,
+        });
+      }
+    };
+
+    const clearAuth = (): void => {
+      cookieStorage.remove(tokenNames.accessToken);
+      cookieStorage.remove(tokenNames.refreshToken);
+
+      user.value = null;
+      isAuthenticated.value = false;
+    };
+
+    const checkIsAuthenticated = (): boolean => {
+      const token = cookieStorage.get(tokenNames.accessToken);
+
+      return !!token && token.split('.').length === 3;
+    };
+
+    const restoreAuth = (): void => {
+      if (checkIsAuthenticated()) {
+        isAuthenticated.value = true;
+      } else {
+        clearAuth();
+      }
+    };
+
+    restoreAuth();
     return {
       // State
       user,
@@ -96,6 +135,7 @@ export const useAuthStore = defineStore(
       updateUser,
       getCurrentUser,
       logout,
+      restoreAuth,
     };
   },
   {
